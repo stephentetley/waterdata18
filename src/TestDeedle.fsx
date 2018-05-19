@@ -1,6 +1,4 @@
-﻿open System
-
-// Deedle might have what we want already
+﻿// Deedle might have what we want already
 #I @"..\packages\Deedle.1.2.5\lib\net40"
 #r @"Deedle.dll"
 open Deedle
@@ -10,7 +8,7 @@ open Deedle
 #r @"FSharp.Data.dll"
 open FSharp.Data
 
-
+open System
 
 [<Literal>]
 let dataSrc = @"G:\work\waterdata18\data\S1 2016_2017.csv"

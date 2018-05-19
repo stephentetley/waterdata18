@@ -73,3 +73,4 @@ let getBadDates () : int * int =
     let proc ac row = 
         if dateReadable row then ac else ac + 1
     (Seq.fold proc 0 flows, Seq.length flows)
+
