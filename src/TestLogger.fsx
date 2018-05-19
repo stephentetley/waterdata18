@@ -16,8 +16,14 @@ let test01 () =
     let src = getDataFile "Acoustic Logger Data.csv"
     readLoggerData src
 
+
+[<Literal>]
+let SimpleOutpath : String  = 
+    __SOURCE_DIRECTORY__ + @"\..\data\SimpleLoggerOut.csv"
+
+
 let test02 () = 
     let src = getDataFile "Acoustic Logger Data.csv"
     let (headers,rows) = readLoggerData src
-    transpose headers rows
-        
+    let records = transpose headers rows
+    simpleRowsToCsv  records SimpleOutpath  

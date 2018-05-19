@@ -65,28 +65,36 @@ let readLoggerData(inputFile:string) : LoggerHeader * seq<LoggerRow> =
     let rows = Seq.map getLoggerRow csv.Rows
     (headers, rows)
 
-type SimpleRow = 
-    { UID: int
-      Date: string
-      LvlSpr: string
-      Value: int }
+
+    
+type SimpleTable = 
+    CsvProvider< Sample = "1,01-May,13,4",
+                 Schema = "UID (int),Date(string),Level(int),Spread(int)",
+                 HasHeaders = true >
+
+type SimpleRow = SimpleTable.Row
 
 
-let transpose1 (headers:LoggerHeader) (row:LoggerRow) : seq<SimpleRow> = 
-    let pairs : seq<string * (int option)> = 
+
+let transpose1 (headers:LoggerHeader) (levels:LoggerRow) (spreads:LoggerRow) : seq<SimpleRow> = 
+    let pairs : seq<string * (int option) * (int option)> = 
         seq { for ix in 0 .. headers.Dates.Length - 1 -> 
-                (headers.Dates.[ix], row.Samples.[ix]) }
-    let chooser (s:string, a:int option) : (string * int) option = 
-        match a with
-        | Some v -> Some (s,v)
-        | None -> None
-    let expand (s,i) : SimpleRow = 
-        { UID = row.UID
-          Date = s
-          LvlSpr = row.SampType
-          Value = i }
+                (headers.Dates.[ix], levels.Samples.[ix], spreads.Samples.[ix]) }
+    let chooser (s:string, a:int option,b:int option) : (string * int * int) option = 
+        match a,b with
+        | Some v, Some w -> Some (s,v,w)
+        | _,_ -> None
+    let expand (s,i,j) : SimpleRow = 
+        SimpleTable.Row(levels.UID,s,i,j)
     Seq.choose chooser pairs |> Seq.map expand
 
 let transpose (headers:LoggerHeader) (rows:seq<LoggerRow>) : seq<SimpleRow> = 
-    rows |> Seq.map (Seq.rev << transpose1 headers) |> Seq.concat
+    let grouper (arr:LoggerRow []) = transpose1 headers arr.[0] arr.[1]
+    Seq.windowed 2 rows |> Seq.map grouper |> Seq.concat
 
+// Currently doesn't write headers...
+let simpleRowsToCsv (source:seq<SimpleRow>) (filepath:string) : unit = 
+    let table = new SimpleTable(source) 
+    use sw = new IO.StreamWriter(filepath)
+    sw.WriteLine "UID,Date,Level,Spread"
+    table.Save(writer = sw, separator = ',', quote = '"' )
