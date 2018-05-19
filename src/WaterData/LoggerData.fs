@@ -28,7 +28,7 @@ type LoggerRow =
       SampType: string 
       Samples: (int option) [] }
 
-let private getHeaders(csv:CsvFile) : LoggerHeader =
+let getHeaders(csv:CsvFile) : LoggerHeader =
     let headers1 (names:string []) : LoggerHeader = 
         { Col1 = names.[0]
           Col2 = names.[1]
@@ -38,6 +38,14 @@ let private getHeaders(csv:CsvFile) : LoggerHeader =
     | Some arr -> headers1 arr
     | None -> failwith "getHeaders - TODO" 
 
+let readLoggerHeaders(inputFile:string) : LoggerHeader = 
+    let csv = 
+        CsvFile.Load(
+            uri=inputFile, 
+            separators = ",",
+            hasHeaders = true, 
+            quote= '"' )
+    getHeaders csv
 
 let optInt (s:string) : int option = 
     match s with
@@ -46,10 +54,7 @@ let optInt (s:string) : int option =
     | _ -> Some (int s)
 
 let private getLoggerRow (row:CsvRow) : LoggerRow = 
-    let samples : seq<int option> = 
-        seq { for ix in 2 .. (row.Columns.Length - 1) -> 
-                 optInt <| row.Item(ix) }
-
+    let samples : seq<int option> = Seq.map optInt row.Columns.[2..]
     { UID = row.Item(0) |> int
       SampType = row.Item(1) 
       Samples = samples |> Seq.toArray }
@@ -68,9 +73,8 @@ let readLoggerData(inputFile:string) : LoggerHeader * seq<LoggerRow> =
 
     
 type SimpleTable = 
-    CsvProvider< Sample = "1,01-May,13,4",
-                 Schema = "UID (int),Date(string),Level(int),Spread(int)",
-                 HasHeaders = true >
+    CsvProvider< Schema = "UID (int),Date(string),Level(int),Spread(int)",
+                 HasHeaders = false >
 
 type SimpleRow = SimpleTable.Row
 
@@ -78,8 +82,7 @@ type SimpleRow = SimpleTable.Row
 
 let transpose1 (headers:LoggerHeader) (levels:LoggerRow) (spreads:LoggerRow) : seq<SimpleRow> = 
     let pairs : seq<string * (int option) * (int option)> = 
-        seq { for ix in 0 .. headers.Dates.Length - 1 -> 
-                (headers.Dates.[ix], levels.Samples.[ix], spreads.Samples.[ix]) }
+        Seq.zip3 headers.Dates levels.Samples spreads.Samples
     let chooser (s:string, a:int option,b:int option) : (string * int * int) option = 
         match a,b with
         | Some v, Some w -> Some (s,v,w)
@@ -96,6 +99,7 @@ let transpose (headers:LoggerHeader) (rows:seq<LoggerRow>) : seq<SimpleRow> =
 // Currently doesn't write headers...
 let simpleRowsToCsv (source:seq<SimpleRow>) (filepath:string) : unit = 
     let table = new SimpleTable(source) 
+
     use sw = new IO.StreamWriter(filepath)
     sw.WriteLine "UID,Date,Level,Spread"
     table.Save(writer = sw, separator = ',', quote = '"' )

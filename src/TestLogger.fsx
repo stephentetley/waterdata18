@@ -27,3 +27,7 @@ let test02 () =
     let (headers,rows) = readLoggerData src
     let records = transpose headers rows
     simpleRowsToCsv  records SimpleOutpath  
+
+let test03 () =
+    let src = getDataFile "Acoustic Logger Data.csv"
+    readLoggerHeaders src
