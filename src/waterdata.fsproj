@@ -53,8 +53,10 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="WaterData\Utils.fs" />
+    <Compile Include="WaterData\AsciiArt.fs" />
     <None Include="Test01.fsx" />
     <None Include="TestDeedle.fsx" />
+    <None Include="TestAscii.fsx" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
