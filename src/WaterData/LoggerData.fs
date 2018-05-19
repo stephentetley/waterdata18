@@ -90,7 +90,8 @@ let transpose1 (headers:LoggerHeader) (levels:LoggerRow) (spreads:LoggerRow) : s
 
 let transpose (headers:LoggerHeader) (rows:seq<LoggerRow>) : seq<SimpleRow> = 
     let grouper (arr:LoggerRow []) = transpose1 headers arr.[0] arr.[1]
-    Seq.windowed 2 rows |> Seq.map grouper |> Seq.concat
+    let half = Seq.length rows / 2
+    Seq.splitInto half rows |> Seq.map grouper |> Seq.concat
 
 // Currently doesn't write headers...
 let simpleRowsToCsv (source:seq<SimpleRow>) (filepath:string) : unit = 
