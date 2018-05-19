@@ -55,10 +55,12 @@
     <Compile Include="WaterData\Utils.fs" />
     <Compile Include="WaterData\AsciiArt.fs" />
     <Compile Include="WaterData\FlowData.fs" />
+    <Compile Include="WaterData\LoggerData.fs" />	
     <None Include="Test01.fsx" />
     <None Include="TestDeedle.fsx" />
     <None Include="TestAscii.fsx" />
     <None Include="TestFlow.fsx" />
+    <None Include="TestLogger.fsx" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
