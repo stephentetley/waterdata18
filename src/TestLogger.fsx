@@ -15,3 +15,9 @@ let getDataFile (name1:string) : string =
 let test01 () = 
     let src = getDataFile "Acoustic Logger Data.csv"
     readLoggerData src
+
+let test02 () = 
+    let src = getDataFile "Acoustic Logger Data.csv"
+    let (headers,rows) = readLoggerData src
+    transpose headers rows
+        
